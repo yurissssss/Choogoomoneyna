@@ -1,0 +1,75 @@
+@import 'normalize.css';
+@import 'tailwindcss';
+
+@theme {
+  /* 컬러 */
+  --color-white: #ffffff;
+  --color-ivory: #fdfbf4;
+  --color-gray-100: #d9d9d9;
+  --color-gray-200: #bdbfb5;
+  --color-gray-300: #999999;
+  --color-limegreen-100: #ecf1d9;
+  --color-limegreen-300: #d8e1ae;
+  --color-limegreen-500: #c3d183;
+  --color-limegreen-600: #929d62;
+  --color-limegreen-700: #757d4f;
+  --color-limegreen-800: #585e3b;
+  --color-limegreen-900: #44492e;
+  --color-green: #228b22;
+  --color-red: #ff0f0f;
+  --color-black: #000000;
+  --color-yellow: #ffbc00;
+  /* 폰트 */
+  --font-jua: 'jua';
+  --font-spoqa: 'spoqa';
+}
+
+@font-face {
+  font-family: 'jua';
+  src: url('./assets/fonts/JUA.woff') format('woff');
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'spoqa';
+  src: url('./assets/fonts/spoqa.woff') format('woff');
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  font-family: var(--font-jua);
+  /* 전체 페이지 스크롤 X */
+  overflow: hidden;
+}
+
+/* 기본 시멘틱 태그 스타일 */
+h1 {
+  font-size: 2rem;
+}
+h2 {
+  font-size: 1.75rem;
+}
+h3 {
+  font-size: 1.5rem;
+}
+h4 {
+  font-size: 1.25rem;
+}
+
+/* button */
+button {
+  cursor: pointer;
+}
+
+/* 오토필 배경, 텍스트 색상 덮어쓰기 */
+input:-webkit-autofill,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:active {
+  box-shadow: 0 0 0 1000px var(--color-limegreen-100) inset !important;
+  -webkit-text-fill-color: var(--color-limegreen-900) !important;
+  transition: background-color 5000s ease-in-out 0s !important;
+  font-family: var(--font-jua) !important;
+}

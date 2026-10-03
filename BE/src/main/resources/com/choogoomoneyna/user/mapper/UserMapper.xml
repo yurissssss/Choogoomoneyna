@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.choogoomoneyna.choogoomoneyna_be.user.mapper.UserMapper">
+
+    <resultMap id="UserResultMap" type="com.choogoomoneyna.choogoomoneyna_be.user.vo.UserVO">
+        <id property="id" column="user_id"/>
+        <result property="email" column="email"/>
+        <result property="password" column="password"/>
+        <result property="nickname" column="nickname"/>
+        <result property="profileImageUrl" column="profile_imageurl"/>
+        <result property="regDate" column="reg_date"/>
+        <result property="updateDate" column="update_date"/>
+        <result property="choogooMi" column="choogoomi_name"/>
+        <result property="loginType" column="user_login_type"/>
+        <result property="connectedId" column="connected_id"/>
+    </resultMap>
+
+    <!-- INSERT -->
+    <insert id="insertUser" parameterType="com.choogoomoneyna.choogoomoneyna_be.user.vo.UserVO" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO users (
+            email, password, nickname, profile_imageurl,
+            reg_date, update_date, choogoomi_name, user_login_type,
+            connected_id
+        )
+        VALUES (
+                   #{email}, #{password}, #{nickname}, #{profileImageUrl},
+                   NOW(), NOW(), #{choogooMi}, #{loginType},
+                   #{connectedId}
+               )
+    </insert>
+
+    <!-- 이메일로 조회 -->
+    <select id="findByEmail" parameterType="String" resultMap="UserResultMap">
+        SELECT
+            user_id,
+            email,
+            password,
+            nickname,
+            profile_imageurl,
+            reg_date,
+            update_date,
+            choogoomi_name,
+            user_login_type,
+            connected_id
+        FROM users
+        WHERE email = #{email}
+    </select>
+
+    <select id="findByEmailAndLoginType" resultMap="UserResultMap">
+        SELECT
+            user_id,
+            email,
+            password,
+            nickname,
+            profile_imageurl,
+            reg_date,
+            update_date,
+            choogoomi_name,
+            user_login_type,
+            connected_id
+        FROM users
+        WHERE email = #{email} AND user_login_type = #{loginType}
+    </select>
+
+    <!-- 닉네임으로 조회 -->
+    <select id="findByNickname" parameterType="String" resultMap="UserResultMap">
+        SELECT
+            user_id,
+            email,
+            password,
+            nickname,
+            profile_imageurl,
+            reg_date,
+            update_date,
+            choogoomi_name,
+            user_login_type,
+            connected_id
+        FROM users
+        WHERE nickname = #{nickname}
+    </select>
+
+    <!-- ID로 조회 -->
+    <select id="findById" parameterType="Long" resultMap="UserResultMap">
+        SELECT
+            user_id,
+            email,
+            password,
+            nickname,
+            profile_imageurl,
+            reg_date,
+            update_date,
+            choogoomi_name,
+            user_login_type,
+            connected_id
+        FROM users
+        WHERE user_id = #{id}
+    </select>
+
+    <!-- ID로 추구미 조회 -->
+    <select id="getChoogooMiByUserId" parameterType="long" resultType="string">
+        SELECT choogoomi_name
+        FROM users
+        WHERE user_id = #{userId}
+    </select>
+
+    <select id="getNicknameByUserId" parameterType="long" resultType="String">
+        SELECT nickname
+        FROM users
+        WHERE user_id = #{userId}
+    </select>
+
+
+    <!-- nickname으로 존재 여부 확인 -->
+    <select id="existsByNickname" resultType="java.lang.Boolean">
+        SELECT COUNT(*) > 0 FROM users WHERE nickname = #{nickname}
+    </select>
+
+    <!-- email과 loginType으로 존재 여부 확인 -->
+    <select id="existsByEmail" resultType="java.lang.Boolean">
+        SELECT COUNT(*) > 0 FROM users WHERE email = #{email} AND user_login_type = #{loginType}
+    </select>
+
+    <!-- 사용자 정보 수정 -->
+    <update id="updateUser" parameterType="com.choogoomoneyna.choogoomoneyna_be.user.vo.UserVO">
+        UPDATE users
+        SET nickname = #{nickname},
+            profile_imageurl = #{profileImageUrl},
+            choogoomi_name = #{choogooMi},
+            user_login_type = #{loginType},
+            connected_id = #{connectedId},
+            update_date = NOW()
+        WHERE email = #{email}
+    </update>
+
+    <!-- id로 닉네임 패스워드 변경 -->
+    <update id="updateNicknameAndPasswordByUserId">
+        UPDATE users
+        SET
+            nickname = #{nickname},
+            password = #{password},
+            update_date = NOW()
+        WHERE user_id = #{userId}
+    </update>
+
+    <!-- 이메일로 삭제 -->
+    <delete id="deleteByEmail" parameterType="String">
+        DELETE FROM users WHERE email = #{email}
+    </delete>
+
+    <!-- 전체 user 수 반환 -->
+    <select id="countAllUsers" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM users
+    </select>
+
+    <!-- 전체 사용자 리스트 -->
+    <select id="findAllUsers" resultMap="UserResultMap">
+        SELECT
+            user_id,
+            email,
+            password,
+            nickname,
+            profile_imageurl,
+            reg_date,
+            update_date,
+            choogoomi_name,
+            user_login_type,
+            connected_id
+        FROM users
+        WHERE choogoomi_name IS NOT NULL
+    </select>
+
+    <update id="updateConnectedId">
+        UPDATE users SET connected_id = #{connectedId} WHERE user_id = #{id}
+    </update>
+
+    <update id="updatePasswordByUserEmail">
+        UPDATE users
+        SET password = #{password},
+            update_date = NOW()
+        WHERE email = #{email}
+    </update>
+
+    <select id="getPasswordByUserId" resultType="java.lang.String">
+        SELECT password
+        FROM users
+        WHERE user_id = #{userId}
+        LIMIT 1
+    </select>
+
+</mapper>

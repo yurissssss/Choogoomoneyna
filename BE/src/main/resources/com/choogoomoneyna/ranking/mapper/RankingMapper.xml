@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.choogoomoneyna.choogoomoneyna_be.ranking.mapper.RankingMapper">
+
+    <!-- ResultMap: DB 결과를 RankingVO에 매핑 -->
+    <resultMap id="RankingResultMap" type="com.choogoomoneyna.choogoomoneyna_be.ranking.vo.RankingVO">
+        <id property="roundNumber" column="round_number"/>
+        <id property="userId" column="user_id"/>
+        <result property="currentRanking" column="current_ranking"/>
+        <result property="regDate" column="reg_date"/>
+        <result property="updateDate" column="update_date"/>
+    </resultMap>
+
+    <!-- 단일 랭킹 삽입 -->
+    <insert id="insertRanking" parameterType="com.choogoomoneyna.choogoomoneyna_be.ranking.vo.RankingVO">
+        INSERT INTO rankings (round_number, user_id, current_ranking, reg_date, update_date)
+        VALUES (#{roundNumber}, #{userId}, #{currentRanking}, NOW(), NOW())
+    </insert>
+
+    <!-- 전체 랭킹 가져오기 -->
+    <select id="getAllRankings" resultMap="RankingResultMap">
+        SELECT round_number, user_id, current_ranking, reg_date, update_date
+        FROM rankings
+    </select>
+
+    <!-- 인당 가장 최근 라운드 랭킹 가져오기 -->
+    <select id="findLatestRankingPerUser" resultMap="RankingResultMap">
+        SELECT r.round_number, r.user_id, r.current_ranking, r.reg_date, r.update_date
+        FROM rankings r
+            INNER JOIN (
+            SELECT user_id, MAX(round_number) AS max_round
+            FROM rankings
+            GROUP BY user_id
+        ) latest
+        ON r.user_id = latest.user_id AND r.round_number = latest.max_round
+    </select>
+
+    <!-- 배치 랭킹 삽입 -->
+    <insert id="batchInsertRankings" parameterType="java.util.List">
+        INSERT INTO rankings (round_number, user_id, current_ranking, reg_date, update_date)
+        VALUES
+        <foreach collection="list" item="rank" separator=",">
+            (#{rank.roundNumber}, #{rank.userId}, #{rank.currentRanking}, NOW(), NOW())
+        </foreach>
+    </insert>
+
+    <!-- 특정 유저의 최신 라운드 랭킹 수정 -->
+    <update id="updateCurrentRankingByUserId" parameterType="map">
+        UPDATE rankings r
+            JOIN (
+                SELECT user_id, MAX(round_number) AS max_round
+                FROM rankings
+                GROUP BY user_id
+            ) latest
+            ON r.user_id = latest.user_id AND r.round_number = latest.max_round
+        SET r.current_ranking = #{currentRanking},
+            r.update_date = NOW()
+        WHERE r.user_id = #{userId}
+    </update>
+
+    <!-- 여러 유저의 최신 라운드 랭킹 일괄 수정 -->
+    <update id="batchUpdateCurrentRanking" parameterType="java.util.List">
+        UPDATE rankings r
+        SET
+        current_ranking = (
+        CASE
+        <foreach collection="list" item="rank">
+            WHEN r.user_id = #{rank.userId} AND r.round_number = #{rank.roundNumber}
+            THEN #{rank.currentRanking}
+        </foreach>
+        END
+        ),
+        update_date = (
+        CASE
+        <foreach collection="list" item="rank">
+            WHEN r.user_id = #{rank.userId} AND r.round_number = #{rank.roundNumber}
+            THEN #{rank.updateDate}
+        </foreach>
+        END
+        )
+        WHERE (r.user_id, r.round_number) IN
+        <foreach collection="list" item="rank" open="(" separator="," close=")">
+            (#{rank.userId}, #{rank.roundNumber})
+        </foreach>
+    </update>
+
+
+
+    <!-- 특정 유저의 랭킹 전체 조회 -->
+    <select id="findAllRankingByUserId" parameterType="long" resultMap="RankingResultMap">
+        SELECT round_number, user_id, current_ranking, reg_date, update_date
+        FROM rankings
+        WHERE user_id = #{userId}
+    </select>
+
+    <!-- 특정 유저의 최신 랭킹 조회 -->
+    <select id="findCurrentRankingByUserId" parameterType="long" resultType="java.lang.Integer">
+        SELECT current_ranking
+        FROM rankings
+        WHERE user_id = #{userId}
+        ORDER BY round_number DESC
+        LIMIT 1
+    </select>
+
+    <!-- 특정 유저의 특정 라운의 랭킹 -->
+    <select id="findRankingByUserIdAndRoundNumber" resultType="java.lang.Integer">
+        SELECT current_ranking
+        FROM rankings
+        WHERE user_id = #{userId} AND round_number = #{roundNumber}
+        LIMIT 1
+    </select>
+
+</mapper>
