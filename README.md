@@ -1,4 +1,4 @@
-## 추구머니나 (Choogoomoneyna!)
+## 추구머니나 (Choogoomoneyna!) 🐙💰
 
 ### 서비스 소개
 
